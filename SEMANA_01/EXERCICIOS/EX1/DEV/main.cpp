@@ -1,87 +1,191 @@
 #include <iostream>
 #include <string>
+#include <vector>
 
-// 1 -  Faça uma função que recebe uma certa medida e ajusta ela percentualmente 
-// entre dois valores mínimo e máximo e retorna esse valor
+using namespace std;
 
-// 2 - Faça uma função que simule a leitura de um sensor lendo o 
-// valor do teclado ao final a função retorna este valor
+//1 - 
 
-// 3 - Faça uma função que armazena uma medida inteira qualquer 
-// em um vetor fornecido. Note que como C não possui vetores 
-// nativos da linguagem, lembre-se que você precisa passar o 
-// valor máximo do vetor assim como a última posição preenchida
-// Evite também que, por acidente, um valor seja escrito em 
-// uma área de memória fora do vetor
+float convertSensor(float size, float min_size, float max_size)
+  {
+    float percentage;
+    percentage = (size - min_size) / (max_size - min_size);
+    return percentage;
+  }
 
+//2 -
+int receiveCommand()
+  {
+    int sensorValue;
+    cin >> sensorValue;
+    return sensorValue;
+  }
 
+//3-
 
-// 4 - Faça uma função que recebe um vetor com 4 posições que contém 
-// o valor da distância de um pequeno robô até cada um dos seus 4 lados.
-// A função deve retornar duas informações: A primeira é a direção 
-// de maior distância ("Direita", "Esquerda", "Frente", "Tras") e a 
-// segunda é esta maior distância.
+int *insertVector(int element, int maxValue, int lastPos, int Numbers[])
+  {
+    int nextPos;
+    nextPos = lastPos + 1;
+    if ((element) > maxValue)
+    {
+      printf("Erro: maxValue: %d, lastPos + 1 (indice): %d\n", maxValue, nextPos);
+    }
+    else
+    {
+      Numbers[nextPos] = element;
+    }
+    return Numbers;
+  }
 
-
-
-
-// 5 - Faça uma função que pergunta ao usuário se ele deseja continuar o mapeamento e 
-// retorna verdadeiro ou falso
-
-
-// 6 - A função abaixo (que está incompleta) vai "dirigindo" virtualmente um robô 
-// e através de 4 sensores em cada um dos 4 pontos do robo ("Direita", "Esquerda", 
-// "Frente", "Tras"). 
-//      A cada passo, ele verifica as distâncias aos objetos e vai mapeando o terreno 
-// para uma movimentação futura. 
-//      Ele vai armazenando estas distancias em um vetor fornecido como parâmetro 
-// e retorna a ultima posicao preenchida do vetor.
-//      Esta função deve ir lendo os 4 sensores até que um comando de pare seja enviado 
-//
-//      Para simular os sensores e os comandos de pare, use as funções já construídas 
-// nos ítens anteriores e em um looping contínuo até que um pedido de parada seja 
-// enviado pelo usuário. 
-//
-//      Complete a função com a chamada das funções já criadas
-int dirige(int *v,int maxv){
-	int maxVetor = maxv;
-	int *vetorMov = v;
-	int posAtualVetor = 0;
-	int dirigindo = 1;		
-	while(dirigindo){		
-		int medida = /// .. Chame a função de de leitura da medida para a "Direita"
-		medida = converteSensor(medida,0,830);
-		posAtualVetor = // Chame a função para armazenar a medida no vetor
-        ///////////////////////////////////////////////////////////////////////////		
-		// Repita as chamadas acima para a "Esquerda", "Frente", "Tras"
-		// ................
-		///////////////////////////////////////////////////////////////////////////
-		dirigindo = leComando();		
-	}
-	return posAtualVetor;
+//4 - 
+string dirMaiorDist(int Vector[])
+  {
+    int maxPos = 0;
+    string posList[4] = {"Right", "Left", "Front", "Back"};
+    for (int i = 0; i < 5; i++)
+    {
+      if (Vector[i] >= Vector[maxPos])
+      {
+        maxPos = i;
+      }
+    }
+  return posList[maxPos];
 }
 
 
-// O trecho abaixo irá utilizar as funções acima para ler os sensores e o movimento
-// do robô e no final percorrer o vetor e mostrar o movimento a cada direção baseado 
-// na maior distância a cada movimento
-void percorre(int *v,int tamPercorrido){		
-	int *vetorMov = v;
-	int maiorDir = 0;
-	
-	for(int i = 0; i< tamPercorrido; i+=4){
-		char *direcao = direcaoMenorCaminho(&(vetorMov[i]),&maiorDir);
-		printf("Movimentando para %s distancia = %i\n",direcao,maiorDir);
-	}
+
+int biggestDistance(int Vector[])
+  {
+    int maxVal = 0;
+    for (int i = 0; i < 5; i++)
+    {
+      if (Vector[i] >= maxVal)
+      {
+        maxVal = Vector[i];
+      }
+    }
+    return maxVal;
+    ;
+  }
+
+//5-
+
+bool continue()
+  {
+    bool keepGoing;
+    cout << "Deseja continuar o mapeamento? 0 - sim, 1 - nao:";
+    cin >> keepGoing;
+    return keepGoing;
+  }
+
+
+//6-
+void printIntArray(int arrayVector[], int arrayLength)
+  {
+    for (int i = 0; i < arrayLength; i++)
+    {
+      int currElement;
+      currElement = arrayVector[i];
+      cout << currElement;
+      cout << "\n";
+    }
+  }
+
+void dirige(int initialVector[4], int maxRight, int maxLeft, int maxFront, int maxBack)
+  {
+    int rightPos[maxRight];
+    int leftPos[maxLeft];
+    int frontPos[maxFront];
+    int backPos[maxBack];
+
+    int rightLastPos = -1;
+    int leftLastPos = -1;
+    int frontLastPos = -1;
+    int backLastPos = -1;
+
+    insertVector(initialVector[0], maxRight, rightLastPos, rightPos);
+    rightLastPos++;
+
+    insertVector(initialVector[1], maxLeft, leftLastPos, leftPos);
+    leftLastPos++;
+
+    insertVector(initialVector[2], maxFront, frontLastPos, frontPos);
+    frontLastPos++;
+
+    insertVector(initialVector[3], maxBack, backLastPos, backPos);
+    backLastPos++;
+
+    int stop = 0;
+    while (stop == 0)
+    {
+      int auxVector[4] = {rightPos[rightLastPos], leftPos[leftLastPos], frontPos[frontLastPos], backPos[backLastPos]};
+      int maxDistance;
+      int opositeDistance;
+      int stepSize;
+      string direcaoMaiorDistancia = dirMaiorDist(auxVector);
+      cout << "Insira o n° de passos para a direcao " << direcaoMaiorDistancia << "\n";
+
+      stepSize = receiveCommand();
+      maxDistance = biggestDistance(auxVector);
+      maxDistance = maxDistance - stepSize;
+
+      if (direcaoMaiorDistancia == "Right")
+      {
+        auxVector[0] = maxDistance;
+        auxVector[1] += stepSize;
+      }
+      else if (direcaoMaiorDistancia == "Left")
+      {
+        auxVector[1] = maxDistance;
+        auxVector[0] += stepSize;
+      }
+      else if (direcaoMaiorDistancia == "Front")
+      {
+        auxVector[2] = maxDistance;
+        auxVector[3] += stepSize;
+      }
+      else if (direcaoMaiorDistancia == "Back")
+      {
+        auxVector[3] = maxDistance;
+        auxVector[2] += stepSize;
+      }
+
+      insertVector(auxVector[0], maxRight, rightLastPos, rightPos);
+      rightLastPos++;
+
+      insertVector(auxVector[1], maxLeft, leftLastPos, leftPos);
+      leftLastPos++;
+
+      insertVector(auxVector[2], maxFront, frontLastPos, frontPos);
+      frontLastPos++;
+
+      insertVector(auxVector[3], maxBack, backLastPos, backPos);
+      backLastPos++;
+
+      // Exibe as informações atuais nos vetores
+      printf("Direcoes Right\n");
+      printIntArray(rightPos, rightLastPos + 1);
+
+      printf("Direcoes Left\n");
+      printIntArray(leftPos, leftLastPos + 1);
+
+      printf("Direcoes Front\n");
+      printIntArray(frontPos, frontLastPos + 1);
+
+      printf("Direcoes Back\n");
+      printIntArray(backPos, backLastPos + 1);
+
+      stop = continue();
+    }
+
+  printf("Posicoes Finais\n #Right:%d\n #Left:%d\n #Front:%d\n #Back:%d\n", rightPos[rightLastPos], leftPos[leftLastPos], frontPos[frontLastPos], backPos[backLastPos]);
 }
 
-int main(int argc, char** argv) {
-	int maxVetor = 100;
-	int vetorMov[maxVetor*4];
-	int posAtualVet = 0;
-	
-	posAtualVet = dirige(vetorMov,maxVetor);
-	percorre(vetorMov,posAtualVet);
-	
-	return 0;
+int main()
+{
+  // Escreva os testes aqui
+  int initialPos[4] = {10, 10, 10, 10};
+  dirige(initialPos, 20, 20, 20, 20);
+  return 0;
 }
