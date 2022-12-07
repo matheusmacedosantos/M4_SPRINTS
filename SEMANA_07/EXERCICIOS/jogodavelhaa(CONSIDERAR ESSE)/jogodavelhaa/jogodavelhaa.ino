@@ -1,45 +1,137 @@
+//atividade de programacao semana 7 Matheus Macedo Santos
 #include <WiFi.h>
+#include <WiFiClient.h>
+#include <WiFiAP.h>
 #include <WebServer.h>
+#include <ESPmDNS.h>
 
-// SSID & Password
-const char* ssid = "matues";  // Enter your SSID here
-const char* password = "Matues123";  //Enter your Password here
+#define led_verde  15
+#define led_vermelho 16
 
-WebServer server(80);  // Object of WebServer(HTTP port, 80 is defult)
+int pontop1 = 0;
+int pontop2 = 0;
+
+int pergtotal = 0;
+
+const char *ssid = "matues"; //Digite o nome da sua rede aqui
+const char *password = "Matues123"; //Digite a senha da rede, deve conter no mínimo 8 caractéres se não dá erro.
+
+WebServer server(80);
 
 void setup() {
+
   Serial.begin(115200);
-  Serial.println("Try Connecting to ");
+
+  pinMode(led_verde, OUTPUT);
+  pinMode(led_vermelho, OUTPUT);
+
+  WiFi.softAP(ssid, password); // remova "password" caso não queria que o Wi-Fi tenha senha
+  IPAddress ESP_IP = WiFi.softAPIP();
+  Serial.print("Wi-Fi: ");
   Serial.println(ssid);
-
-  // Connect to your wi-fi modem
-  WiFi.begin(ssid, password);
-
-  // Check wi-fi is connected to wi-fi network
-  while (WiFi.status() != WL_CONNECTED) {
-  delay(1000);
-  Serial.print(".");
+  Serial.print("IP: "); // O IP que aparecer aqui coloque no navegador para acessar a página web do ESP32 que será criada logo abaixo.
+  Serial.println(ESP_IP);
+  server.begin();
+  Serial.println("Servidor Iniciado.");
+  if (MDNS.begin("esp32")) {
+    Serial.println("MDNS responder started");
   }
-  Serial.println("");
-  Serial.println("WiFi connected successfully");
-  Serial.print("Got IP: ");
-  Serial.println(WiFi.localIP());  //Show ESP32 IP on serial
-
-  server.on("/", handle_root);
-
+  server.on("/", handleRoot);
+  server.on("/on", handleOn);
+  server.on("/off", handleOff);
+  server.onNotFound(handleNotFound);
   server.begin();
   Serial.println("HTTP server started");
-  delay(100); 
+}
+  void handleRoot(){
+    String html = "";
+    html += "<meta charset='UTF-8'>";
+    html += "<body style='background: linear-gradient(90deg, rgb(2, 3, 0) 0%, rgb(89, 84, 75) 100%);'>";
+    html += "<h1 style=' font-family: cursive; color: rgb(214, 40, 40); padding: 36px 50px; margin-top: 30px; margin-left: 50px;'>Player 1</h1>";
+    html += "<h1 style=' font-family: cursive; color: rgb(214, 40, 40); padding: 36px 50px; margin-top: -60px; margin-left: 50px;'>Pontos: ";
+    html += pontop1;
+    html += "</h1>";
+    html += "<h1 style=' font-family: cursive;  color: rgb(214, 40, 40); padding: 36px 50px; margin-top: -200px; margin-left: 950px;'>Player 2</h1>";
+    html += "<h1 style=' font-family: cursive;  color: rgb(214, 40, 40); padding: 36px 50px; margin-top: -65px; margin-left: 950px;'>Pontos: ";
+    html += pontop2;
+    html += "</h1>";
+    html += "<h1    style=' font-family: cursive; color: white; text-align: center; padding: 36px 50px; margin-top: 30px;'>Teste de matematica</h1>";
+    html += "<h2  style=' text-align: center; font-family: cursive; color: white; margin-left: 540px';> 1) Resultado de 9x2? </h2> <br><br><br>";
+    html += "<h2><a href=\"/on\" style='text-align: center;  font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>A) 18</a></h2><br><br><br>";
+    html += "<h2><a href=\"/off\" style='text-align: center;  font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>B) 24</a></h2><br><br><br>";
+    html += "<h2><a href=\"/off\" style='text-align: center;  font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>C) 8</a></h2><br><br><br>";
+    
+    html += "<h2 style='text-align: center; font-family: cursive; color: white; margin-left: 540px';> 2) Resultado de 2+5x7? </h2> <br><br><br>";
+    html += "<h2><a href=\"/off\" style=' text-align: center; font-family: cursive;  background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>A) 49</a></h2><br><br><br>";
+    html += "<h2><a href=\"/on\" style=' text-align: center; font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>B) 37</a></h2><br><br><br>";
+    html += "<h2><a href=\"/off\" style='text-align: center;  font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>C) 33</a></h2><br><br><br>";
+
+    html += "<h2 style='text-align: center;  font-family: cursive; color: white; margin-left: 540px';> 3) Qual numero mais proximo de pi? </h2> <br><br><br>";
+    html += "<h2><a href=\"/off\" style=' text-align: center; font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>A) 3</a></h2><br><br><br>";
+    html += "<h2><a href=\"/on\" style='text-align: center;  font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>B) 3,15</a></h2><br><br><br>";
+    html += "<h2><a href=\"/off\" style='text-align: center;  font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>C) 3,5</a></h2><br><br><br>";
+
+    html += "<h2 style='text-align: center;  font-family: cursive; color: white; margin-left: 540px';> 4) Se uma pessoa esta vindo em velocidade constante por 500m e demora 2 minuto para chegar ao ponto final, qual é a sua velocidade aproximadamente? </h2> <br><br><br>";
+    html += "<h2><a href=\"/on\" style='text-align: center;  font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>A) 4m/s</a></h2><br><br><br>";
+    html += "<h2><a href=\"/off\" style='text-align: center;  font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>B) 5m/s</a></h2><br><br><br>";
+    html += "<h2><a href=\"/off\" style='text-align: center;  font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 550px;'>C) 6m/s</a></h2><br><br><br>";
+
+    html += "<h2><a href=\"/off\" style='text-align: center;  font-family: cursive; background-color: gray; border: none; color: white; padding: 16px 40px; margin-left: 485px;'>Proximo jogador</a></h2><br><br><br>";
+
+    html += "</body>";
+    server.send(200, "text/html", html);
+  }
+
+  void handleOn(){
+    if(pergtotal >= 4){
+    digitalWrite(led_verde, HIGH);
+    pontop2 += 1;
+    pergtotal += 1;
+    delay(2000);
+    digitalWrite(led_verde, LOW);
+    digitalWrite(led_vermelho, LOW);
+    handleRoot();
+    } else{    
+    digitalWrite(led_verde, HIGH);
+    pontop1 += 1;
+    pergtotal += 1;
+    delay(2000);
+    digitalWrite(led_verde, LOW);
+    digitalWrite(led_vermelho, LOW);
+    handleRoot();
+    }
+  }
+  void handleOff(){
+    digitalWrite(led_vermelho, HIGH);
+    delay(2000);
+    digitalWrite(led_vermelho, LOW);
+    digitalWrite(led_verde, LOW);
+    pergtotal +=1;
+    handleRoot();
+  }
+  void handleNotFound() {
+  String message = "File Not Found\n\n";
+  message += "URI: ";
+  message += server.uri();
+  message += "\nMethod: ";
+  message += (server.method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += server.args();
+  message += "\n";
+  for (uint8_t i = 0; i < server.args(); i++){
+    message += " " + server.argName(i) + ": " + server.arg(i) + "\n"; 
+  }
+  server.send(404, "text/plain", message);
 }
 
 void loop() {
   server.handleClient();
-}
-
-// HTML & CSS contents which display on web server
-String HTML = "<!DOCTYPE html><html lang='en'><head>  <meta charset='UTF-8'>  <meta http-equiv='X-UA-Compatible' content='IE=edge'>  <meta name='viewport' content='width=device-width, initial-scale=1.0'>  <title>Jogo da velha</title></head><body>  <main>    <h1>JOGO DA VELHA</h1>    <hr />    <div class='game'>      <button data-i='1'></button>      <button data-i='2'></button>      <button data-i='3'></button>      <button data-i='4'></button>      <button data-i='5'></button>      <button data-i='6'></button>      <button data-i='7'></button>      <button data-i='8'></button>      <button data-i='9'></button>    </div>    <h2 class='currentPlayer'></h2>  </main></body><script>  const currentPlayer = document.querySelector('.currentPlayer');let selected;let player = 'X';let positions = [  [1, 2, 3],  [4, 5, 6],  [7, 8, 9],  [1, 4, 7],  [2, 5, 8],  [3, 6, 9],  [1, 5, 9],  [3, 5, 7],];function init() {  selected = [];  currentPlayer.innerHTML = `JOGADOR DA VEZ: ${player}`;  document.querySelectorAll('.game button').forEach((item) => {    item.innerHTML = '';    item.addEventListener('click', newMove);  });}init();function newMove(e) {  const index = e.target.getAttribute('data-i');  e.target.innerHTML = player;  e.target.removeEventListener('click', newMove);  selected[index] = player;  setTimeout(() => {    check();  }, [100]);  player = player === 'X' ? 'O' : 'X';  currentPlayer.innerHTML = `JOGADOR DA VEZ: ${player}`;}function check() {  let playerLastMove = player === 'X' ? 'O' : 'X';  const items = selected    .map((item, i) => [item, i])    .filter((item) => item[0] === playerLastMove)    .map((item) => item[1]);  for (pos of positions) {    if (pos.every((item) => items.includes(item))) {      alert('O JOGADOR ' + playerLastMove + ' GANHOU!');      init();      return;    }  }  if (selected.filter((item) => item).length === 9) {    alert('DEU EMPATE!');    init();    return;  }}</script><style>  * {    margin: 0;    padding: 0;    box-sizing: border-box;    font-family: cursive;  }    body {    height: 100vh;    display: flex;    align-items: center;    justify-content: center;    background: #f7f7f7;  }    main {    display: flex;    flex-direction: column;    gap: 5px;  }    h1 {    text-align: center;  }    hr {    font-weight: bold;    height: 3px;    background: black;    margin-bottom: 10px;  }    .game {    display: grid;    grid-template-columns: 1fr 1fr 1fr;  }    .game button {    width: 100px;    height: 100px;    margin: 5px;    cursor: pointer;    font-size: 50px;    background: #f7f7f7;  }</style></html> ";
-
-// Handle root url (/)
-void handle_root() {
-  server.send(200, "text/html", HTML);
-}
+  if (pergtotal >= 8){
+    delay(2000);
+    pontop1 = 0;
+    pontop2 = 0;
+    pergtotal = 0;
+    delay(2000); 
+  }
+  delay(2);
+} 
